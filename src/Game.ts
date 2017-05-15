@@ -1,8 +1,6 @@
 class SimpleGame
 {
 	game:Phaser.Game;
-	mapModel:gameMapModel;
-	graphics:Phaser.Graphics;
 	
 	constructor()
 	{
@@ -12,7 +10,7 @@ class SimpleGame
 		// Phaser.AUTO - determine the renderer automatically (canvas, webgl)
 		// 'content' - the name of the container to add our game to
 		// { preload:this.preload, create:this.create} - functions to call for our states
-		this.game = new Phaser.Game( 800, 600, Phaser.AUTO, 'content', { preload:this.preload, create:this.create, update:this.update} );
+		this.game = new Phaser.Game( 720, 480, Phaser.AUTO, 'content', { preload:this.preload, create:this.create, update:this.update}, false, false );
 		
 	}
 	
@@ -22,8 +20,12 @@ class SimpleGame
 		// key 'player'. We're also setting the background colour
 		// so it's the same as the background colour in the image
 		
-		//this.game.load.spritesheet( 'player', "assets/player.png", 16, 32);
-		//this.game.stage.backgroundColor = 0xB20059;
+		this.game.load.spritesheet( 'clara', "assets/clara.png", 48, 48);
+		this.game.load.spritesheet('terrain', "assets/crystalCaves.png", 32,32);
+		this.game.load.tilemap('caveRoom', 'assets/caveRoom.json', null, Phaser.Tilemap.TILED_JSON);
+		this.game.stage.backgroundColor = 0xB20059;
+
+		
 	}
 	
 	create()
@@ -32,35 +34,32 @@ class SimpleGame
 		// center of the screen, and set the anchor to the center of
 		// the image so it's centered properly. There's a lot of
 		// centering in that last sentence
-		
-		//var player = this.game.add.sprite( this.game.world.centerX, this.game.world.centerY, 'player' );
-		//player.anchor.setTo( 0.5, 0.5 );
-		//this.game.camera.scale.x = 2;
-		//this.game.camera.scale.y = 2;
-		//this.game.camera.follow(player);
+		var tilemap = this.game.add.tilemap('caveRoom');
+		tilemap.addTilesetImage('foregroundTiles', 'terrain');
+		var layer = tilemap.createLayer('foreground');
+		layer.resizeWorld();
 
-		this.graphics = this.game.add.graphics(0,0);
-		this.mapModel = gameMapGenerator.createMap(new Phaser.Point(800,600), 10);
+		var player = this.game.add.sprite( this.game.world.centerX - 200, this.game.world.centerY - 200, 'clara' );
+		player.animations.add('stand', [1]);
+		player.animations.play('stand');
+		player.anchor.setTo( 0.5, 0.5 );
+		this.game.camera.scale.x = 3;
+		this.game.camera.scale.y = 3;
+		this.game.camera.follow(player);
+
+		this.game.physics.startSystem(Phaser.Physics.ARCADE);
+		this.game.physics.arcade.gravity.y = 100;
+		this.game.physics.enable([player], Phaser.Physics.ARCADE);
+
+		player.body.collideWorldBounds = true;
+
 
 		
 	}
 
 	update()
 	{
-		this.graphics.clear();
-		this.graphics.lineStyle(1, 0xffd900, 1);
-		for (var poly of this.mapModel.voronoiPolygons){
-			if (poly.contains(this.game.input.x, this.game.input.y))
-			{
-				this.graphics.beginFill(Phaser.Color.getColor(50, 50, 255));
-			}
-			else
-			{
-				this.graphics.beginFill(Phaser.Color.getColor(50, 255, 100));
-			}
-			this.graphics.drawPolygon(poly);
-			this.graphics.endFill();
-		}
+		
 	}
 }
 
