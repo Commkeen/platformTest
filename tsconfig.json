@@ -3,6 +3,7 @@
 		"target": "ES5",
 		"module": "amd",
 		"sourceMap": false,
-		"outDir": "bin/js"
+		"outDir": "bin/js",
+		"watch":true
 	}
 }
